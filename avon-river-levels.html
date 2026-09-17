@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Avon Levels</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌊</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d2b30%22/><text x=%2250%22 y=%2268%22 font-size=%2258%22 text-anchor=%22middle%22>🌊</text></svg>">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Avon Levels">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-0:#0a2226;
+    --bg-1:#0f2f33;
+    --bg-2:#153c40;
+    --card:#0e3338cc;
+    --card-line:#2f5f61;
+    --ink:#eef4f2;
+    --ink-dim:#9fbcbb;
+    --ink-faint:#6f9394;
+    --gold:#e3b869;
+    --rising:#e3956b;
+    --falling:#7fb7c9;
+    --steady:#9fbcbb;
+    --band:#1c4b4f;
+    --safe:#5fae8d;
+    --warn:#d98a4d;
+    --danger:#d9634d;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;
+    padding:0;
+    background:
+      radial-gradient(120% 90% at 15% -10%, var(--bg-2), transparent 60%),
+      radial-gradient(140% 100% at 100% 110%, #0c2a2e, transparent 55%),
+      var(--bg-0);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+  .wrap{
+    max-width:560px;
+    margin:0 auto;
+    padding:28px 18px 40px;
+  }
+  header{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:20px;
+    padding:0 4px;
+  }
+  header h1{
+    font-family:'Fraunces',serif;
+    font-optical-sizing:auto;
+    font-weight:500;
+    font-size:22px;
+    letter-spacing:0.2px;
+    margin:0;
+    color:var(--ink);
+  }
+  header h1 span{
+    color:var(--ink-faint);
+    font-weight:400;
+    font-size:15px;
+    display:block;
+    margin-top:2px;
+    font-family:'Inter',sans-serif;
+  }
+  #refresh-btn{
+    background:none;
+    border:1px solid var(--card-line);
+    color:var(--ink-dim);
+    width:36px;height:36px;
+    border-radius:50%;
+    font-size:16px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .5s ease, background .2s ease, color .2s ease;
+    flex:none;
+  }
+  #refresh-btn:hover{color:var(--ink); background:var(--band);}
+  #refresh-btn.spin{transform:rotate(360deg);}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--card-line);
+    border-radius:18px;
+    padding:22px 22px 18px;
+    margin-bottom:16px;
+    backdrop-filter:blur(6px);
+    position:relative;
+    overflow:hidden;
+  }
+  .card-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+  }
+  .station-name{
+    font-family:'Fraunces',serif;
+    font-size:17px;
+    font-weight:500;
+    margin:0 0 2px;
+  }
+  .station-river{
+    font-size:12.5px;
+    color:var(--ink-faint);
+    margin:0;
+  }
+  .status-pill{
+    font-size:11.5px;
+    padding:4px 10px;
+    border-radius:100px;
+    border:1px solid var(--card-line);
+    color:var(--ink-dim);
+    white-space:nowrap;
+    flex:none;
+  }
+  .status-pill.safe{color:var(--safe);border-color:#2f5f4f;}
+  .status-pill.warn{color:var(--warn);border-color:#5f4a2f;}
+  .status-pill.danger{color:var(--danger);border-color:#5f2f2f;}
+
+  .level-row{
+    display:flex;
+    align-items:flex-end;
+    gap:14px;
+    margin:14px 0 6px;
+  }
+  .level-value{
+    font-family:'Fraunces',serif;
+    font-size:52px;
+    font-weight:500;
+    line-height:1;
+    letter-spacing:-0.5px;
+  }
+  .level-unit{
+    font-size:15px;
+    color:var(--ink-faint);
+    font-weight:500;
+    margin-left:2px;
+  }
+  .trend{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    font-size:13px;
+    padding-bottom:8px;
+    color:var(--steady);
+  }
+  .trend.rising{color:var(--rising);}
+  .trend.falling{color:var(--falling);}
+  .trend svg{width:14px;height:14px;}
+
+  .range-track{
+    height:6px;
+    border-radius:4px;
+    background:var(--band);
+    margin:14px 0 4px;
+    position:relative;
+    overflow:visible;
+  }
+  .range-fill{
+    position:absolute;
+    top:0;bottom:0;left:0;
+    border-radius:4px;
+    background:linear-gradient(90deg, var(--falling), var(--gold));
+  }
+  .range-marker{
+    position:absolute;
+    top:50%;
+    width:12px;height:12px;
+    border-radius:50%;
+    background:var(--ink);
+    border:2px solid var(--bg-1);
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 0 2px var(--card-line);
+  }
+  .range-labels{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--ink-faint);
+    margin-bottom:16px;
+  }
+
+  .chart-wrap{margin-top:6px;}
+  .chart-label{
+    font-size:11px;
+    color:var(--ink-faint);
+    display:flex;
+    justify-content:space-between;
+    margin-bottom:6px;
+  }
+  svg.chart{width:100%;height:86px;display:block;overflow:visible;}
+  .chart-line{fill:none;stroke:var(--gold);stroke-width:2;stroke-linejoin:round;stroke-linecap:round;}
+  .chart-fill{fill:url(#chartGrad);opacity:0.55;}
+  .chart-day{stroke:var(--card-line);stroke-width:1;stroke-dasharray:2 3;}
+  .chart-dot{fill:var(--gold);}
+
+  .meta-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:14px;
+    padding-top:12px;
+    border-top:1px solid var(--card-line);
+    font-size:11.5px;
+    color:var(--ink-faint);
+  }
+  .meta-row a{
+    color:var(--ink-faint);
+    text-decoration:none;
+    border-bottom:1px dotted var(--ink-faint);
+  }
+
+  .skeleton{
+    height:52px;width:120px;border-radius:6px;
+    background:linear-gradient(90deg, var(--band), #1f4d51, var(--band));
+    background-size:200% 100%;
+    animation:shimmer 1.4s infinite;
+  }
+  @keyframes shimmer{
+    0%{background-position:200% 0;}
+    100%{background-position:-200% 0;}
+  }
+
+  .error-note{
+    font-size:12.5px;
+    color:var(--danger);
+    background:#5f2f2f22;
+    border:1px solid #5f2f2f;
+    padding:8px 12px;
+    border-radius:10px;
+    margin-top:10px;
+  }
+
+  footer{
+    text-align:center;
+    font-size:11px;
+    color:var(--ink-faint);
+    margin-top:22px;
+    line-height:1.6;
+  }
+  footer a{color:var(--ink-dim);text-decoration:underline;}
+
+  @media (prefers-color-scheme: light){
+    /* Intentionally kept dark — river widget reads best against the water-night palette in both modes */
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>River Avon<span>Warwick &amp; Stratford-upon-Avon</span></h1>
+    <button id="refresh-btn" title="Refresh now" aria-label="Refresh">↻</button>
+  </header>
+
+  <div id="cards"></div>
+
+  <footer>
+    Live readings from the Environment Agency, updated ~every 15 min.<br>
+    Auto-refreshes every 10 minutes · <a href="https://check-for-flooding.service.gov.uk/" target="_blank" rel="noopener">check-for-flooding.service.gov.uk</a>
+  </footer>
+</div>
+
+<script>
+const STATIONS = [
+  { id: '2091', name: 'Warwick', typicalLow: 0.40, typicalHigh: 1.46 },
+  { id: '2093', name: 'Stratford-upon-Avon', typicalLow: 0.50, typicalHigh: 0.93 }
+];
+
+const API_BASE = 'https://environment.data.gov.uk/flood-monitoring';
+const cardsEl = document.getElementById('cards');
+const refreshBtn = document.getElementById('refresh-btn');
+
+function skeletonCard(station){
+  return `
+    <div class="card" id="card-${station.id}">
+      <div class="card-top">
+        <div>
+          <p class="station-name">${station.name}</p>
+          <p class="station-river">River Avon</p>
+        </div>
+        <span class="status-pill">Loading…</span>
+      </div>
+      <div class="level-row"><div class="skeleton"></div></div>
+    </div>`;
+}
+
+function render(){
+  cardsEl.innerHTML = STATIONS.map(skeletonCard).join('');
+}
+render();
+
+function fmtTime(d){
+  return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+function fmtDayShort(d){
+  return d.toLocaleDateString('en-GB', { weekday: 'short' });
+}
+
+function trendFromReadings(readings){
+  if (readings.length < 2) return 'steady';
+  const latest = readings[readings.length - 1].value;
+  const prevIdx = Math.max(0, readings.length - 5); // ~1hr back at 15-min cadence
+  const prev = readings[prevIdx].value;
+  const diff = latest - prev;
+  if (Math.abs(diff) < 0.01) return 'steady';
+  return diff > 0 ? 'rising' : 'falling';
+}
+
+function trendIcon(trend){
+  if (trend === 'rising') return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 17 L11 9 L15 13 L20 6" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 6 L20 6 L20 12" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  if (trend === 'falling') return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 7 L11 15 L15 11 L20 18" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 18 L20 18 L20 12" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12 L20 12" stroke-linecap="round"/></svg>`;
+}
+
+function buildChart(readings, typicalLow, typicalHigh){
+  const w = 520, h = 86, pad = 4;
+  const values = readings.map(r => r.value);
+  const times = readings.map(r => r.dateTime.getTime());
+  const minT = Math.min(...times), maxT = Math.max(...times);
+  const minV = Math.min(...values, typicalLow);
+  const maxV = Math.max(...values, typicalHigh);
+  const vSpan = (maxV - minV) || 1;
+
+  const x = t => pad + ((t - minT) / (maxT - minT || 1)) * (w - pad * 2);
+  const y = v => (h - pad) - ((v - minV) / vSpan) * (h - pad * 2);
+
+  const linePts = readings.map(r => `${x(r.dateTime.getTime()).toFixed(1)},${y(r.value).toFixed(1)}`).join(' L ');
+  const path = `M ${linePts}`;
+  const fillPath = `M ${x(minT).toFixed(1)},${h} L ${linePts} L ${x(maxT).toFixed(1)},${h} Z`;
+
+  // day gridlines at local midnight
+  const dayLines = [];
+  const dayLabels = [];
+  let cursor = new Date(readings[0].dateTime);
+  cursor.setHours(0,0,0,0);
+  cursor.setDate(cursor.getDate() + 1);
+  const endTime = readings[readings.length - 1].dateTime.getTime();
+  while (cursor.getTime() < endTime) {
+    const xp = x(cursor.getTime());
+    dayLines.push(`<line class="chart-day" x1="${xp.toFixed(1)}" y1="0" x2="${xp.toFixed(1)}" y2="${h}"/>`);
+    cursor = new Date(cursor.getTime() + 86400000);
+  }
+
+  const lastPt = readings[readings.length - 1];
+  const lastX = x(lastPt.dateTime.getTime()), lastY = y(lastPt.value);
+
+  return `
+    <svg class="chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="var(--gold)" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="var(--gold)" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      ${dayLines.join('')}
+      <path class="chart-fill" d="${fillPath}"/>
+      <path class="chart-line" d="${path}"/>
+      <circle class="chart-dot" cx="${lastX.toFixed(1)}" cy="${lastY.toFixed(1)}" r="3.2"/>
+    </svg>`;
+}
+
+function statusForLevel(value, low, high){
+  if (value > high) return { cls: 'warn', label: 'Above typical' };
+  if (value < low) return { cls: 'safe', label: 'Below typical' };
+  return { cls: 'safe', label: 'Within typical range' };
+}
+
+async function fetchStation(station){
+  const readingsUrl = `${API_BASE}/id/stations/${station.id}/readings.json?_sorted&_limit=700`;
+  const res = await fetch(readingsUrl);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = await res.json();
+  const items = (json.items || [])
+    .filter(i => typeof i.value === 'number')
+    .map(i => ({ dateTime: new Date(i.dateTime), value: i.value }))
+    .sort((a, b) => a.dateTime - b.dateTime);
+  if (items.length === 0) throw new Error('No readings returned');
+
+  const cutoff = Date.now() - 7 * 86400000;
+  const weekItems = items.filter(i => i.dateTime.getTime() >= cutoff);
+  const readings = weekItems.length >= 2 ? weekItems : items;
+
+  return readings;
+}
+
+function renderCard(station, readings, error){
+  const el = document.getElementById(`card-${station.id}`);
+  if (!el) return;
+
+  if (error) {
+    el.innerHTML = `
+      <div class="card-top">
+        <div>
+          <p class="station-name">${station.name}</p>
+          <p class="station-river">River Avon</p>
+        </div>
+        <span class="status-pill danger">Offline</span>
+      </div>
+      <div class="error-note">Couldn't reach the Environment Agency feed. Will retry automatically.</div>`;
+    return;
+  }
+
+  const latest = readings[readings.length - 1];
+  const trend = trendFromReadings(readings);
+  const status = statusForLevel(latest.value, station.typicalLow, station.typicalHigh);
+  const span = station.typicalHigh - station.typicalLow;
+  const displayLow = Math.min(station.typicalLow, latest.value) - span * 0.15;
+  const displayHigh = Math.max(station.typicalHigh, latest.value) + span * 0.15;
+  const pct = Math.max(0, Math.min(100, ((latest.value - displayLow) / (displayHigh - displayLow)) * 100));
+  const fillPct = Math.max(0, Math.min(100, ((station.typicalHigh - displayLow) / (displayHigh - displayLow)) * 100));
+
+  const firstDay = readings[0].dateTime;
+  const lastDay = readings[readings.length - 1].dateTime;
+
+  el.innerHTML = `
+    <div class="card-top">
+      <div>
+        <p class="station-name">${station.name}</p>
+        <p class="station-river">River Avon</p>
+      </div>
+      <span class="status-pill ${status.cls}">${status.label}</span>
+    </div>
+
+    <div class="level-row">
+      <div class="level-value">${latest.value.toFixed(2)}<span class="level-unit">m</span></div>
+      <div class="trend ${trend}">${trendIcon(trend)}${trend.charAt(0).toUpperCase() + trend.slice(1)}</div>
+    </div>
+
+    <div class="range-track">
+      <div class="range-fill" style="width:${fillPct.toFixed(1)}%"></div>
+      <div class="range-marker" style="left:${pct.toFixed(1)}%"></div>
+    </div>
+    <div class="range-labels">
+      <span>Typical ${station.typicalLow.toFixed(2)}m</span>
+      <span>Typical ${station.typicalHigh.toFixed(2)}m</span>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-label">
+        <span>${fmtDayShort(firstDay)} ${firstDay.getDate()}</span>
+        <span>${fmtDayShort(lastDay)} ${lastDay.getDate()}</span>
+      </div>
+      ${buildChart(readings, station.typicalLow, station.typicalHigh)}
+    </div>
+
+    <div class="meta-row">
+      <span>Updated ${fmtTime(latest.dateTime)}</span>
+      <a href="https://check-for-flooding.service.gov.uk/station/${station.id === '2091' ? '2044' : '2046'}" target="_blank" rel="noopener">EA station page ↗</a>
+    </div>`;
+}
+
+async function loadAll(){
+  await Promise.all(STATIONS.map(async station => {
+    try {
+      const readings = await fetchStation(station);
+      renderCard(station, readings, null);
+      localStorage.setItem(`avon-cache-${station.id}`, JSON.stringify(readings.slice(-700)));
+    } catch (err) {
+      const cached = localStorage.getItem(`avon-cache-${station.id}`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached).map(r => ({ dateTime: new Date(r.dateTime), value: r.value }));
+          renderCard(station, parsed, null);
+          return;
+        } catch (_) {}
+      }
+      renderCard(station, null, err);
+    }
+  }));
+}
+
+refreshBtn.addEventListener('click', () => {
+  refreshBtn.classList.add('spin');
+  loadAll().finally(() => setTimeout(() => refreshBtn.classList.remove('spin'), 500));
+});
+
+loadAll();
+setInterval(loadAll, 10 * 60 * 1000); // refresh every 10 minutes
+</script>
+</body>
+</html>
