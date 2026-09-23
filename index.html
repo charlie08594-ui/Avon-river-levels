@@ -1,14 +1,15 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Avon Levels</title>
+<title>River Levels</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌊</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230d2b30%22/><text x=%2250%22 y=%2268%22 font-size=%2258%22 text-anchor=%22middle%22>🌊</text></svg>">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Avon Levels">
+<meta name="apple-mobile-web-app-title" content="River Levels">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -260,7 +261,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1>River Avon<span>Warwick &amp; Stratford-upon-Avon</span></h1>
+    <h1>River Levels<span>Avon &amp; Wye gauges</span></h1>
     <button id="refresh-btn" title="Refresh now" aria-label="Refresh">↻</button>
   </header>
 
@@ -274,8 +275,10 @@
 
 <script>
 const STATIONS = [
-  { id: '2091', name: 'Warwick', typicalLow: 0.40, typicalHigh: 1.46 },
-  { id: '2093', name: 'Stratford-upon-Avon', typicalLow: 0.50, typicalHigh: 0.93 }
+  { id: '2091', name: 'Warwick', river: 'Avon', typicalLow: 0.40, typicalHigh: 1.46, rloi: '2044' },
+  { id: '2093', name: 'Stratford-upon-Avon', river: 'Avon', typicalLow: 0.50, typicalHigh: 0.93, rloi: '2046' },
+  { id: '2615', name: 'Bidford-on-Avon', river: 'Avon', typicalLow: 0.96, typicalHigh: 2.60, rloi: '2234' },
+  { id: '055807_TG_320', name: 'Old Wye Bridge', river: 'Wye', typicalLow: 0.10, typicalHigh: 3.30, rloi: '4017' }
 ];
 
 const API_BASE = 'https://environment.data.gov.uk/flood-monitoring';
@@ -288,7 +291,7 @@ function skeletonCard(station){
       <div class="card-top">
         <div>
           <p class="station-name">${station.name}</p>
-          <p class="station-river">River Avon</p>
+          <p class="station-river">River ${station.river}</p>
         </div>
         <span class="status-pill">Loading…</span>
       </div>
@@ -378,7 +381,7 @@ function statusForLevel(value, low, high){
 }
 
 async function fetchStation(station){
-  const readingsUrl = `${API_BASE}/id/stations/${station.id}/readings.json?_sorted&_limit=700`;
+  const readingsUrl = `${API_BASE}/id/stations/${encodeURIComponent(station.id)}/readings.json?parameter=level&_sorted&_limit=700`;
   const res = await fetch(readingsUrl);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const json = await res.json();
@@ -404,7 +407,7 @@ function renderCard(station, readings, error){
       <div class="card-top">
         <div>
           <p class="station-name">${station.name}</p>
-          <p class="station-river">River Avon</p>
+          <p class="station-river">River ${station.river}</p>
         </div>
         <span class="status-pill danger">Offline</span>
       </div>
@@ -428,7 +431,7 @@ function renderCard(station, readings, error){
     <div class="card-top">
       <div>
         <p class="station-name">${station.name}</p>
-        <p class="station-river">River Avon</p>
+        <p class="station-river">River ${station.river}</p>
       </div>
       <span class="status-pill ${status.cls}">${status.label}</span>
     </div>
@@ -457,7 +460,7 @@ function renderCard(station, readings, error){
 
     <div class="meta-row">
       <span>Updated ${fmtTime(latest.dateTime)}</span>
-      <a href="https://check-for-flooding.service.gov.uk/station/${station.id === '2091' ? '2044' : '2046'}" target="_blank" rel="noopener">EA station page ↗</a>
+      <a href="https://check-for-flooding.service.gov.uk/station/${station.rloi}" target="_blank" rel="noopener">EA station page ↗</a>
     </div>`;
 }
 
